@@ -1,186 +1,142 @@
 terraform {
   required_providers {
-    oci = {
-      source  = "oracle/oci"
+    google = {
+      source  = "hashicorp/google"
       version = "~> 5.0"
     }
   }
 }
 
-provider "oci" {
-  user_ocid    = var.user_ocid
-  tenancy_ocid = var.tenancy_ocid
-  fingerprint  = var.fingerprint
-  region       = var.region
-  private_key  = var.private_key
+provider "google" {
+  credentials = var.credentials
+  project     = var.project_id
+  region      = var.region
+  zone        = var.zone
 }
 
-data "oci_identity_availability_domains" "ads" {
-  compartment_id = var.tenancy_ocid
-}
-
-# VCN principal
-resource "oci_core_vcn" "lab_vcn" {
-  compartment_id = var.tenancy_ocid
-  cidr_block     = "10.0.0.0/16"
-  display_name   = "5g-lab-vcn"
-}
-
-# Internet Gateway
-resource "oci_core_internet_gateway" "lab_igw" {
-  compartment_id = var.tenancy_ocid
-  vcn_id         = oci_core_vcn.lab_vcn.id
-  display_name   = "5g-lab-igw"
-}
-
-# Route Table
-resource "oci_core_route_table" "lab_rt" {
-  compartment_id = var.tenancy_ocid
-  vcn_id         = oci_core_vcn.lab_vcn.id
-  display_name   = "5g-lab-rt"
-
-  route_rules {
-    destination       = "0.0.0.0/0"
-    network_entity_id = oci_core_internet_gateway.lab_igw.id
-  }
-}
-
-# Security List
-resource "oci_core_security_list" "lab_sl" {
-  compartment_id = var.tenancy_ocid
-  vcn_id         = oci_core_vcn.lab_vcn.id
-  display_name   = "5g-lab-sl"
-
-  ingress_security_rules {
-    protocol = "6"
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 22
-      max = 22
-    }
-  }
-
-  ingress_security_rules {
-    protocol = "all"
-    source   = "10.0.0.0/8"
-  }
-
-  egress_security_rules {
-    protocol    = "all"
-    destination = "0.0.0.0/0"
-  }
+# Réseau VPC
+resource "google_compute_network" "lab_vpc" {
+  name                    = "5g-lab-vpc"
+  auto_create_subnetworks = false
 }
 
 # Subnet Radio Access
-resource "oci_core_subnet" "subnet_radio" {
-  compartment_id    = var.tenancy_ocid
-  vcn_id            = oci_core_vcn.lab_vcn.id
-  cidr_block        = "10.0.1.0/24"
-  display_name      = "subnet-radio"
-  route_table_id    = oci_core_route_table.lab_rt.id
-  security_list_ids = [oci_core_security_list.lab_sl.id]
+resource "google_compute_subnetwork" "subnet_radio" {
+  name          = "subnet-radio"
+  ip_cidr_range = "10.0.1.0/24"
+  network       = google_compute_network.lab_vpc.id
+  region        = var.region
 }
 
 # Subnet Core 5G
-resource "oci_core_subnet" "subnet_core" {
-  compartment_id    = var.tenancy_ocid
-  vcn_id            = oci_core_vcn.lab_vcn.id
-  cidr_block        = "10.0.2.0/24"
-  display_name      = "subnet-core-5g"
-  route_table_id    = oci_core_route_table.lab_rt.id
-  security_list_ids = [oci_core_security_list.lab_sl.id]
+resource "google_compute_subnetwork" "subnet_core" {
+  name          = "subnet-core"
+  ip_cidr_range = "10.0.2.0/24"
+  network       = google_compute_network.lab_vpc.id
+  region        = var.region
 }
 
 # Subnet Operateur
-resource "oci_core_subnet" "subnet_op" {
-  compartment_id    = var.tenancy_ocid
-  vcn_id            = oci_core_vcn.lab_vcn.id
-  cidr_block        = "10.0.3.0/24"
-  display_name      = "subnet-operateur"
-  route_table_id    = oci_core_route_table.lab_rt.id
-  security_list_ids = [oci_core_security_list.lab_sl.id]
+resource "google_compute_subnetwork" "subnet_op" {
+  name          = "subnet-op"
+  ip_cidr_range = "10.0.3.0/24"
+  network       = google_compute_network.lab_vpc.id
+  region        = var.region
 }
 
-# VM1 - srsRAN (subnet radio)
-resource "oci_core_instance" "vm1_srsran" {
-  compartment_id      = var.tenancy_ocid
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
-  display_name        = "vm1-srsran"
-  shape               = "VM.Standard.A1.Flex"
+# Firewall — SSH depuis internet
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "allow-ssh"
+  network = google_compute_network.lab_vpc.name
 
-  shape_config {
-    ocpus         = 2
-    memory_in_gbs = 8
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
   }
 
-  source_details {
-    source_type = "image"
-    source_id   = var.ubuntu_image_id
+  source_ranges = ["0.0.0.0/0"]
+}
+
+# Firewall — tout autorisé en interne
+resource "google_compute_firewall" "allow_internal" {
+  name    = "allow-internal"
+  network = google_compute_network.lab_vpc.name
+
+  allow {
+    protocol = "all"
   }
 
-  create_vnic_details {
-    subnet_id              = oci_core_subnet.subnet_radio.id
-    private_ip             = "10.0.1.10"
-    assign_public_ip       = true
+  source_ranges = ["10.0.0.0/16"]
+}
+
+# VM1 — srsRAN
+resource "google_compute_instance" "vm1_srsran" {
+  name         = "vm1-srsran"
+  machine_type = "e2-standard-2"
+  zone         = var.zone
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 50
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet_radio.id
+    network_ip = "10.0.1.10"
+    access_config {}
   }
 
   metadata = {
-    ssh_authorized_keys = var.ssh_public_key
+    ssh-keys = "ubuntu:${var.ssh_public_key}"
   }
 }
 
-# VM2 - Core 5G Swarm Manager (subnet core)
-resource "oci_core_instance" "vm2_core5g" {
-  compartment_id      = var.tenancy_ocid
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
-  display_name        = "vm2-core-5g"
-  shape               = "VM.Standard.A1.Flex"
+# VM2 — Core 5G
+resource "google_compute_instance" "vm2_core5g" {
+  name         = "vm2-core-5g"
+  machine_type = "e2-standard-2"
+  zone         = var.zone
 
-  shape_config {
-    ocpus         = 2
-    memory_in_gbs = 8
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 50
+    }
   }
 
-  source_details {
-    source_type = "image"
-    source_id   = var.ubuntu_image_id
-  }
-
-  create_vnic_details {
-    subnet_id        = oci_core_subnet.subnet_core.id
-    private_ip       = "10.0.2.10"
-    assign_public_ip = true
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet_core.id
+    network_ip = "10.0.2.10"
+    access_config {}
   }
 
   metadata = {
-    ssh_authorized_keys = var.ssh_public_key
+    ssh-keys = "ubuntu:${var.ssh_public_key}"
   }
 }
 
-# VM3 - Kamailio Swarm Worker (subnet operateur)
-resource "oci_core_instance" "vm3_kamailio" {
-  compartment_id      = var.tenancy_ocid
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
-  display_name        = "vm3-kamailio"
-  shape               = "VM.Standard.A1.Flex"
+# VM3 — Kamailio
+resource "google_compute_instance" "vm3_kamailio" {
+  name         = "vm3-kamailio"
+  machine_type = "e2-standard-2"
+  zone         = var.zone
 
-  shape_config {
-    ocpus         = 1
-    memory_in_gbs = 4
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 50
+    }
   }
 
-  source_details {
-    source_type = "image"
-    source_id   = var.ubuntu_image_id
-  }
-
-  create_vnic_details {
-    subnet_id        = oci_core_subnet.subnet_op.id
-    private_ip       = "10.0.3.10"
-    assign_public_ip = true
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet_op.id
+    network_ip = "10.0.3.10"
+    access_config {}
   }
 
   metadata = {
-    ssh_authorized_keys = var.ssh_public_key
+    ssh-keys = "ubuntu:${var.ssh_public_key}"
   }
 }

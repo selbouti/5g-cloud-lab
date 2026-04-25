@@ -1,50 +1,19 @@
-name: "Terraform Deploy"
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - "terraform/**"
-
-jobs:
-  terraform:
-    name: "Deploy Infrastructure"
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.7.0"
-
-      - name: Terraform Init
-        working-directory: terraform
-        run: terraform init
-
-      - name: Terraform Plan
+- name: Terraform Plan
         working-directory: terraform
         env:
-          TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
-          TF_VAR_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_credentials: ${{ secrets.GCP_CREDENTIALS }}
+          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE }}
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
-          TF_VAR_ubuntu_image_id: ${{ secrets.OCI_UBUNTU_IMAGE_ID }}
         run: terraform plan
 
       - name: Terraform Apply
         working-directory: terraform
         env:
-          TF_VAR_user_ocid: ${{ secrets.OCI_USER_OCID }}
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_fingerprint: ${{ secrets.OCI_FINGERPRINT }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
-          TF_VAR_private_key: ${{ secrets.OCI_PRIVATE_KEY }}
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_credentials: ${{ secrets.GCP_CREDENTIALS }}
+          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE }}
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
-          TF_VAR_ubuntu_image_id: ${{ secrets.OCI_UBUNTU_IMAGE_ID }}
         run: terraform apply -auto-approve
