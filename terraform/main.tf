@@ -131,3 +131,19 @@ resource "google_compute_instance" "vm3_kamailio" {
     ssh-keys = "ubuntu:${var.ssh_public_key}"
   }
 }
+resource "google_compute_firewall" "allow_swarm" {
+  name    = "allow-swarm"
+  network = google_compute_network.lab_vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["2377", "7946"]
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = ["7946", "4789"]
+  }
+
+  source_ranges = ["10.0.0.0/16"]
+}
