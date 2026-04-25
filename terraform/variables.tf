@@ -1,4 +1,4 @@
-# Variables Oracle Cloud
+# Variables Oracle Cloud V1
 variable "project_id" {}
 variable "region" {}
 variable "zone" {}
