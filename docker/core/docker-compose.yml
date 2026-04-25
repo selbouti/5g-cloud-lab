@@ -46,8 +46,10 @@ services:
 networks:
   overlay-5g:
     external: true
+    name: overlay-5g
   overlay-radio:
     external: true
+    name: overlay-radio
 
 volumes:
   mongodb-data:
