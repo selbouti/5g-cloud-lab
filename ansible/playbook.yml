@@ -84,7 +84,7 @@
       delegate_to: localhost
 
     - name: Rejoindre le Swarm
-      shell: docker swarm join --token {{ token_file.content | b64decode | trim }} 34.52.198.164:2377
+      shell: docker swarm join --token {{ token_file.content | b64decode | trim }}  10.0.2.10:2377
       ignore_errors: yes
 
 - name: Créer les overlay networks sur VM2

@@ -44,3 +44,8 @@ jobs:
           TF_VAR_zone: ${{ secrets.GCP_ZONE }}
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
         run: terraform apply -auto-approve
+      - name: Terraform Init
+        working-directory: terraform
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+        run: terraform init

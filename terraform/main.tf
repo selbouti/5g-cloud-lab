@@ -1,4 +1,8 @@
 terraform {
+  backend "gcs" {
+    bucket = "5g-lab-terraform-state"
+    prefix = "terraform/state"
+  }
   required_providers {
     google = {
       source  = "hashicorp/google"
