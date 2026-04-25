@@ -21,12 +21,16 @@
 
     - name: Ajouter la clé GPG Docker
       shell: |
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        curl -fsSL --max-time 30 https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/docker-archive-keyring.gpg
 
     - name: Ajouter le repo Docker
       shell: |
         echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
-    
+      args:
+        creates: /etc/apt/sources.list.d/docker.list
+
     - name: Installer Docker
       apt:
         name:
@@ -63,10 +67,10 @@
       register: swarm_token
 
     - name: Sauvegarder le token
-      local_action:
-        module: copy
+      copy:
         content: "{{ swarm_token.stdout }}"
         dest: /tmp/swarm_token.txt
+      delegate_to: localhost
 
 - name: Joindre le Swarm sur VM3 et VM1
   hosts: kamailio:srsran
@@ -74,10 +78,10 @@
   tasks:
 
     - name: Lire le token
-      local_action:
-        module: slurp
+      slurp:
         src: /tmp/swarm_token.txt
       register: token_file
+      delegate_to: localhost
 
     - name: Rejoindre le Swarm
       shell: docker swarm join --token {{ token_file.content | b64decode | trim }} 34.52.198.164:2377
