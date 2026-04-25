@@ -16,7 +16,7 @@ provider "google" {
 
 # Réseau VPC
 resource "google_compute_network" "lab_vpc" {
-  name                    = "5g-lab-vpc"
+  name                    = "lab-5g-vpc"
   auto_create_subnetworks = false
 }
 
@@ -140,3 +140,4 @@ resource "google_compute_instance" "vm3_kamailio" {
     ssh-keys = "ubuntu:${var.ssh_public_key}"
   }
 }
+a
