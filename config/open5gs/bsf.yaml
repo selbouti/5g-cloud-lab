@@ -1,0 +1,11 @@
+logger:
+  file: /var/log/open5gs/bsf.log
+
+bsf:
+  sbi:
+    server:
+      - address: 10.0.4.2
+        port: 7777
+    client:
+      nrf:
+        - uri: http://10.0.4.2:7777

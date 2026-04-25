@@ -1,0 +1,13 @@
+logger:
+  file: /var/log/open5gs/udr.log
+
+udr:
+  sbi:
+    server:
+      - address: 10.0.4.2
+        port: 7777
+    client:
+      nrf:
+        - uri: http://10.0.4.2:7777
+
+  db_uri: mongodb://10.0.4.10/open5gs
