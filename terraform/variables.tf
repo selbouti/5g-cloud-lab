@@ -1,3 +1,4 @@
+# Variables Oracle Cloud
 variable "user_ocid" {}
 variable "tenancy_ocid" {}
 variable "fingerprint" {}
