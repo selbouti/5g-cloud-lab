@@ -22,7 +22,7 @@ data "oci_identity_availability_domains" "ads" {
 # VCN principal
 resource "oci_core_vcn" "lab_vcn" {
   compartment_id = var.tenancy_ocid
-  cidr_block     = "10.0.0.0/8"
+  cidr_block     = "10.0.0.0/16"
   display_name   = "5g-lab-vcn"
 }
 
