@@ -1,0 +1,39 @@
+name: "Ansible Deploy"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "ansible/**"
+  workflow_run:
+    workflows: ["Terraform Deploy"]
+    types:
+      - completed
+
+jobs:
+  ansible:
+    name: "Configure VMs"
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          pip install ansible
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/5g-lab-key
+          chmod 600 ~/.ssh/5g-lab-key
+          ssh-keyscan 34.52.198.164 >> ~/.ssh/known_hosts
+          ssh-keyscan 35.240.11.19 >> ~/.ssh/known_hosts
+          ssh-keyscan 104.155.56.219 >> ~/.ssh/known_hosts
+
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook -i ansible/inventory.yml ansible/playbook.yml

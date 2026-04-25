@@ -1,0 +1,101 @@
+---
+- name: Installer Docker sur toutes les VMs
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Mettre à jour apt
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Installer les dépendances Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Ajouter la clé GPG Docker
+      shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+    - name: Ajouter le repo Docker
+      shell: |
+        echo "deb [arch=arm64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
+
+    - name: Installer Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        update_cache: yes
+        state: present
+
+    - name: Démarrer Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ajouter ubuntu au groupe docker
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+- name: Initialiser Swarm Manager sur VM2
+  hosts: core5g
+  become: true
+  tasks:
+
+    - name: Initialiser Docker Swarm
+      shell: docker swarm init --advertise-addr {{ ansible_host }}
+      ignore_errors: yes
+
+    - name: Récupérer le token Worker
+      shell: docker swarm join-token worker -q
+      register: swarm_token
+
+    - name: Sauvegarder le token
+      local_action:
+        module: copy
+        content: "{{ swarm_token.stdout }}"
+        dest: /tmp/swarm_token.txt
+
+- name: Joindre le Swarm sur VM3 et VM1
+  hosts: kamailio:srsran
+  become: true
+  tasks:
+
+    - name: Lire le token
+      local_action:
+        module: slurp
+        src: /tmp/swarm_token.txt
+      register: token_file
+
+    - name: Rejoindre le Swarm
+      shell: docker swarm join --token {{ token_file.content | b64decode | trim }} 34.52.198.164:2377
+      ignore_errors: yes
+
+- name: Créer les overlay networks sur VM2
+  hosts: core5g
+  become: true
+  tasks:
+
+    - name: Créer overlay-radio
+      shell: docker network create --driver overlay --attachable --subnet 10.0.6.0/24 overlay-radio
+      ignore_errors: yes
+
+    - name: Créer overlay-5g
+      shell: docker network create --driver overlay --attachable --subnet 10.0.4.0/24 overlay-5g
+      ignore_errors: yes
+
+    - name: Créer overlay-op
+      shell: docker network create --driver overlay --attachable --subnet 10.0.5.0/24 overlay-op
+      ignore_errors: yes
