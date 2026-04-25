@@ -14,13 +14,11 @@ provider "google" {
   zone        = var.zone
 }
 
-# Réseau VPC
 resource "google_compute_network" "lab_vpc" {
-  name                    = "lab-5g-vpc"
+  name                    = "lab-vpc"
   auto_create_subnetworks = false
 }
 
-# Subnet Radio Access
 resource "google_compute_subnetwork" "subnet_radio" {
   name          = "subnet-radio"
   ip_cidr_range = "10.0.1.0/24"
@@ -28,7 +26,6 @@ resource "google_compute_subnetwork" "subnet_radio" {
   region        = var.region
 }
 
-# Subnet Core 5G
 resource "google_compute_subnetwork" "subnet_core" {
   name          = "subnet-core"
   ip_cidr_range = "10.0.2.0/24"
@@ -36,7 +33,6 @@ resource "google_compute_subnetwork" "subnet_core" {
   region        = var.region
 }
 
-# Subnet Operateur
 resource "google_compute_subnetwork" "subnet_op" {
   name          = "subnet-op"
   ip_cidr_range = "10.0.3.0/24"
@@ -44,7 +40,6 @@ resource "google_compute_subnetwork" "subnet_op" {
   region        = var.region
 }
 
-# Firewall — SSH depuis internet
 resource "google_compute_firewall" "allow_ssh" {
   name    = "allow-ssh"
   network = google_compute_network.lab_vpc.name
@@ -57,7 +52,6 @@ resource "google_compute_firewall" "allow_ssh" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-# Firewall — tout autorisé en interne
 resource "google_compute_firewall" "allow_internal" {
   name    = "allow-internal"
   network = google_compute_network.lab_vpc.name
@@ -69,9 +63,8 @@ resource "google_compute_firewall" "allow_internal" {
   source_ranges = ["10.0.0.0/16"]
 }
 
-# VM1 — srsRAN
 resource "google_compute_instance" "vm1_srsran" {
-  name         = "vm1-srsran"
+  name         = "vm-srsran"
   machine_type = "e2-standard-2"
   zone         = var.zone
 
@@ -93,9 +86,8 @@ resource "google_compute_instance" "vm1_srsran" {
   }
 }
 
-# VM2 — Core 5G
 resource "google_compute_instance" "vm2_core5g" {
-  name         = "vm2-core-5g"
+  name         = "vm-core-5g"
   machine_type = "e2-standard-2"
   zone         = var.zone
 
@@ -117,9 +109,8 @@ resource "google_compute_instance" "vm2_core5g" {
   }
 }
 
-# VM3 — Kamailio
 resource "google_compute_instance" "vm3_kamailio" {
-  name         = "vm3-kamailio"
+  name         = "vm-kamailio"
   machine_type = "e2-standard-2"
   zone         = var.zone
 
@@ -140,4 +131,3 @@ resource "google_compute_instance" "vm3_kamailio" {
     ssh-keys = "ubuntu:${var.ssh_public_key}"
   }
 }
-a
