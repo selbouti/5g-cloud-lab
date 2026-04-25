@@ -132,7 +132,7 @@ resource "oci_core_instance" "vm1_srsran" {
 # VM2 - Core 5G Swarm Manager (subnet core)
 resource "oci_core_instance" "vm2_core5g" {
   compartment_id      = var.tenancy_ocid
-  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
+  availability_domain = data.oci_identity_availability_domains.ads.availability_domains[1].name
   display_name        = "vm2-core-5g"
   shape               = "VM.Standard.A1.Flex"
 
