@@ -3,3 +3,5 @@ variable "tenancy_ocid" {}
 variable "fingerprint" {}
 variable "region" {}
 variable "private_key" {}
+variable "ssh_public_key" {}
+variable "ubuntu_image_id" {}
