@@ -1,0 +1,22 @@
+all:
+  children:
+    core5g:
+      hosts:
+        vm2-core-5g:
+          ansible_host: 34.52.198.164
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/5g-lab-key
+
+    kamailio:
+      hosts:
+        vm3-kamailio:
+          ansible_host: 35.240.11.19
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/5g-lab-key
+
+    srsran:
+      hosts:
+        vm1-srsran:
+          ansible_host: 104.155.56.219
+          ansible_user: ubuntu
+          ansible_ssh_private_key_file: ~/.ssh/5g-lab-key
