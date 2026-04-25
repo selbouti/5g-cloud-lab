@@ -1,47 +1,149 @@
-version: "3.8"
-
 services:
 
   mongodb:
     image: mongo:6
-    container_name: mongodb
     networks:
-      overlay-5g:
-        ipv4_address: 10.0.4.10
+      - overlay-5g
     volumes:
       - mongodb-data:/data/db
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
 
-  open5gs:
+  nrf:
     image: gradiant/open5gs:2.7.0
-    container_name: open5gs
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-nrfd -c /opt/open5gs/etc/open5gs/nrf.yaml"
+    networks:
+      - overlay-5g
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  ausf:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-ausfd -c /opt/open5gs/etc/open5gs/ausf.yaml"
+    networks:
+      - overlay-5g
+    depends_on:
+      - nrf
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  udm:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-udmd -c /opt/open5gs/etc/open5gs/udm.yaml"
+    networks:
+      - overlay-5g
+    depends_on:
+      - nrf
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  udr:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-udrd -c /opt/open5gs/etc/open5gs/udr.yaml"
+    environment:
+      - DB_URI=mongodb://mongodb/open5gs
+    networks:
+      - overlay-5g
+    depends_on:
+      - nrf
+      - mongodb
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  pcf:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-pcfd -c /opt/open5gs/etc/open5gs/pcf.yaml"
+    environment:
+      - DB_URI=mongodb://mongodb/open5gs
+    networks:
+      - overlay-5g
+    depends_on:
+      - nrf
+      - mongodb
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  bsf:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-bsfd -c /opt/open5gs/etc/open5gs/bsf.yaml"
+    networks:
+      - overlay-5g
+    depends_on:
+      - nrf
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  smf:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-smfd -c /opt/open5gs/etc/open5gs/smf.yaml"
+    networks:
+      - overlay-5g
+    depends_on:
+      - nrf
+      - upf
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  upf:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-upfd -c /opt/open5gs/etc/open5gs/upf.yaml"
     cap_add:
       - NET_ADMIN
     sysctls:
       - net.ipv4.ip_forward=1
-    environment:
-      - DB_URI=mongodb://10.0.4.10/open5gs
     networks:
-      overlay-5g:
-        ipv4_address: 10.0.4.2
-      overlay-radio:
-        ipv4_address: 10.0.6.2
-    volumes:
-      - ../../config/open5gs:/etc/open5gs
+      - overlay-5g
     depends_on:
-      - mongodb
+      - nrf
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  amf:
+    image: gradiant/open5gs:2.7.0
+    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-amfd -c /opt/open5gs/etc/open5gs/amf.yaml"
+    networks:
+      - overlay-5g
+      - overlay-radio
+    depends_on:
+      - nrf
+      - smf
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
 
   webui:
     image: gradiant/open5gs-webui:2.7.0
-    container_name: webui
     environment:
-      - DB_URI=mongodb://10.0.4.10/open5gs
+      - DB_URI=mongodb://mongodb/open5gs
     networks:
-      overlay-5g:
-        ipv4_address: 10.0.4.5
+      - overlay-5g
     ports:
       - "3000:3000"
     depends_on:
       - mongodb
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
 
 networks:
   overlay-5g:
