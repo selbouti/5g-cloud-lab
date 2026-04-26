@@ -13,6 +13,7 @@ services:
 
   nrf:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-nrfd -c /opt/open5gs/etc/open5gs/nrf.yaml"
     networks:
       - overlay-5g
@@ -23,6 +24,7 @@ services:
 
   ausf:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-ausfd -c /opt/open5gs/etc/open5gs/ausf.yaml"
     networks:
       - overlay-5g
@@ -35,6 +37,7 @@ services:
 
   udm:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-udmd -c /opt/open5gs/etc/open5gs/udm.yaml"
     networks:
       - overlay-5g
@@ -47,6 +50,7 @@ services:
 
   udr:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-udrd -c /opt/open5gs/etc/open5gs/udr.yaml"
     environment:
       - DB_URI=mongodb://mongodb/open5gs
@@ -62,6 +66,7 @@ services:
 
   pcf:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-pcfd -c /opt/open5gs/etc/open5gs/pcf.yaml"
     environment:
       - DB_URI=mongodb://mongodb/open5gs
@@ -77,6 +82,7 @@ services:
 
   bsf:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-bsfd -c /opt/open5gs/etc/open5gs/bsf.yaml"
     networks:
       - overlay-5g
@@ -89,6 +95,7 @@ services:
 
   smf:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-smfd -c /opt/open5gs/etc/open5gs/smf.yaml"
     networks:
       - overlay-5g
@@ -102,6 +109,7 @@ services:
 
   upf:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-upfd -c /opt/open5gs/etc/open5gs/upf.yaml"
     cap_add:
       - NET_ADMIN
@@ -118,6 +126,7 @@ services:
 
   amf:
     image: gradiant/open5gs:2.7.0
+    entrypoint: ""
     command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-amfd -c /opt/open5gs/etc/open5gs/amf.yaml"
     networks:
       - overlay-5g
