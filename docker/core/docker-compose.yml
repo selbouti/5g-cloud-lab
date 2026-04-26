@@ -14,6 +14,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && open5gs-nrfd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
     deploy:
@@ -25,6 +27,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-ausfd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
     deploy:
@@ -36,6 +40,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-udmd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
     deploy:
@@ -47,6 +53,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-udrd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     environment:
       - DB_URI=mongodb://mongodb/open5gs
     networks:
@@ -60,6 +68,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-pcfd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     environment:
       - DB_URI=mongodb://mongodb/open5gs
     networks:
@@ -73,20 +83,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-bsfd"]
-    networks:
-      - overlay-5g
-    deploy:
-      placement:
-        constraints:
-          - node.hostname == vm-core-5g
-
-  upf:
-    image: gradiant/open5gs:2.7.0
-    entrypoint: [""]
-    command: ["bash", "-c", "mkdir -p /var/log/open5gs && open5gs-upfd"]
-    cap_add:
-      - NET_ADMIN
-    privileged: true
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
     deploy:
@@ -98,6 +96,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 10 && open5gs-smfd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
     deploy:
@@ -109,6 +109,8 @@ services:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
     command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 15 && open5gs-amfd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
       - overlay-radio
