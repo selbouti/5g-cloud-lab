@@ -1,5 +1,4 @@
 services:
-
   mongodb:
     image: mongo:6
     networks:
@@ -13,8 +12,8 @@ services:
 
   nrf:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-nrfd -c /opt/open5gs/etc/open5gs/nrf.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && open5gs-nrfd"]
     networks:
       - overlay-5g
     deploy:
@@ -24,12 +23,10 @@ services:
 
   ausf:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-ausfd -c /opt/open5gs/etc/open5gs/ausf.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-ausfd"]
     networks:
       - overlay-5g
-    depends_on:
-      - nrf
     deploy:
       placement:
         constraints:
@@ -37,12 +34,10 @@ services:
 
   udm:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-udmd -c /opt/open5gs/etc/open5gs/udm.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-udmd"]
     networks:
       - overlay-5g
-    depends_on:
-      - nrf
     deploy:
       placement:
         constraints:
@@ -50,15 +45,12 @@ services:
 
   udr:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-udrd -c /opt/open5gs/etc/open5gs/udr.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-udrd"]
     environment:
       - DB_URI=mongodb://mongodb/open5gs
     networks:
       - overlay-5g
-    depends_on:
-      - nrf
-      - mongodb
     deploy:
       placement:
         constraints:
@@ -66,15 +58,12 @@ services:
 
   pcf:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-pcfd -c /opt/open5gs/etc/open5gs/pcf.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-pcfd"]
     environment:
       - DB_URI=mongodb://mongodb/open5gs
     networks:
       - overlay-5g
-    depends_on:
-      - nrf
-      - mongodb
     deploy:
       placement:
         constraints:
@@ -82,26 +71,10 @@ services:
 
   bsf:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-bsfd -c /opt/open5gs/etc/open5gs/bsf.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 5 && open5gs-bsfd"]
     networks:
       - overlay-5g
-    depends_on:
-      - nrf
-    deploy:
-      placement:
-        constraints:
-          - node.hostname == vm-core-5g
-
-  smf:
-    image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-smfd -c /opt/open5gs/etc/open5gs/smf.yaml"
-    networks:
-      - overlay-5g
-    depends_on:
-      - nrf
-      - upf
     deploy:
       placement:
         constraints:
@@ -109,16 +82,24 @@ services:
 
   upf:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-upfd -c /opt/open5gs/etc/open5gs/upf.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && open5gs-upfd"]
     cap_add:
       - NET_ADMIN
-    sysctls:
-      - net.ipv4.ip_forward=1
+    privileged: true
     networks:
       - overlay-5g
-    depends_on:
-      - nrf
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
+
+  smf:
+    image: gradiant/open5gs:2.7.0
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 10 && open5gs-smfd"]
+    networks:
+      - overlay-5g
     deploy:
       placement:
         constraints:
@@ -126,14 +107,11 @@ services:
 
   amf:
     image: gradiant/open5gs:2.7.0
-    entrypoint: ""
-    command: /bin/sh -c "mkdir -p /var/log/open5gs && open5gs-amfd -c /opt/open5gs/etc/open5gs/amf.yaml"
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 15 && open5gs-amfd"]
     networks:
       - overlay-5g
       - overlay-radio
-    depends_on:
-      - nrf
-      - smf
     deploy:
       placement:
         constraints:
@@ -147,8 +125,6 @@ services:
       - overlay-5g
     ports:
       - "3000:3000"
-    depends_on:
-      - mongodb
     deploy:
       placement:
         constraints:
