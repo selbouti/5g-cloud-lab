@@ -1,0 +1,13 @@
+- name: Create overlay networks
+  hosts: core5g
+  become: true
+
+  tasks:
+    - name: overlay-5g
+      shell: docker network inspect overlay-5g || docker network create -d overlay overlay-5g
+
+    - name: overlay-radio
+      shell: docker network inspect overlay-radio || docker network create -d overlay overlay-radio
+
+    - name: overlay-op
+      shell: docker network inspect overlay-op || docker network create -d overlay overlay-op
