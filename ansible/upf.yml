@@ -1,0 +1,17 @@
+- name: Deploy UPF
+  hosts: core5g
+  become: true
+
+  tasks:
+    - name: Remove old UPF
+      shell: docker rm -f upf || true
+
+    - name: Run UPF
+      shell: |
+        docker run -d \
+        --name upf \
+        --network overlay-5g \
+        --cap-add NET_ADMIN \
+        --privileged \
+        gradiant/open5gs:2.7.0 \
+        open5gs-upfd
