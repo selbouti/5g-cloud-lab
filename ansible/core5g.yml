@@ -1,0 +1,7 @@
+- name: Deploy Open5GS core
+  hosts: core5g
+  become: true
+
+  tasks:
+    - name: Deploy stack
+      shell: docker stack deploy -c /home/ubuntu/docker-compose.yml core5g
