@@ -1,0 +1,36 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - /home/ubuntu/5g-cloud-lab/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - overlay-monitoring
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-kamailio
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - overlay-monitoring
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-kamailio
+
+networks:
+  overlay-monitoring:
+    external: true
+    name: overlay-monitoring
+
+volumes:
+  grafana-data:
+  prometheus-data:
