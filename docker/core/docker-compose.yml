@@ -3,13 +3,13 @@ services:
     image: mongo:6
     networks:
       - overlay-5g
+      - overlay-monitoring
     volumes:
       - mongodb-data:/data/db
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   nrf:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -18,11 +18,11 @@ services:
       - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   ausf:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -31,11 +31,11 @@ services:
       - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   udm:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -44,11 +44,11 @@ services:
       - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   udr:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -59,11 +59,11 @@ services:
       - DB_URI=mongodb://mongodb/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   pcf:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -74,11 +74,11 @@ services:
       - DB_URI=mongodb://mongodb/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   bsf:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -87,11 +87,11 @@ services:
       - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   smf:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -100,11 +100,11 @@ services:
       - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   amf:
     image: gradiant/open5gs:2.7.0
     entrypoint: [""]
@@ -114,17 +114,18 @@ services:
     networks:
       - overlay-5g
       - overlay-radio
+      - overlay-monitoring
     deploy:
       placement:
         constraints:
           - node.hostname == vm-core-5g
-
   webui:
     image: gradiant/open5gs-webui:2.7.0
     environment:
       - DB_URI=mongodb://mongodb/open5gs
     networks:
       - overlay-5g
+      - overlay-monitoring
     ports:
       - "3000:3000"
     deploy:
@@ -139,6 +140,9 @@ networks:
   overlay-radio:
     external: true
     name: overlay-radio
+  overlay-monitoring:
+    external: true
+    name: overlay-monitoring
 
 volumes:
   mongodb-data:
