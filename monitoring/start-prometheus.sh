@@ -2,11 +2,8 @@
 sudo docker rm -f prometheus 2>/dev/null
 
 sudo docker run -d --name prometheus \
-  --network host \
+  --network overlay-5g \
+  -p 9090:9090 \
   -v ~/5g-cloud-lab/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml \
   --restart always \
   prom/prometheus:latest
-
-sudo docker network connect overlay-5g prometheus
-sudo docker network connect overlay-radio prometheus
-sudo docker network connect overlay-op prometheus
