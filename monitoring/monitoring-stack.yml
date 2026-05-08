@@ -1,7 +1,6 @@
 services:
   node-exporter:
     image: prom/node-exporter:latest
-    network_mode: host
     pid: host
     volumes:
       - /proc:/host/proc:ro
@@ -11,17 +10,25 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
+    networks:
+      - host
     deploy:
       mode: global
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
-    network_mode: host
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
+    networks:
+      - host
     deploy:
       mode: global
+
+networks:
+  host:
+    external: true
+    name: host
