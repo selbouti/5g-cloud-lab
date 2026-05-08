@@ -12,6 +12,7 @@ services:
       - '--path.rootfs=/rootfs'
     networks:
       - host
+      - overlay-5g
     deploy:
       mode: global
 
@@ -25,6 +26,7 @@ services:
       - /dev/disk/:/dev/disk:ro
     networks:
       - host
+      - overlay-5g
     deploy:
       mode: global
 
@@ -32,3 +34,6 @@ networks:
   host:
     external: true
     name: host
+  overlay-5g:
+    external: true
+    name: overlay-5g
