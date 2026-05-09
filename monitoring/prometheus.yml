@@ -22,9 +22,4 @@ scrape_configs:
       - targets:
           - 'amf:9090'
           - 'smf:9090'
-          - 'nrf:9090'
-          - 'ausf:9090'
-          - 'udm:9090'
-          - 'udr:9090'
           - 'pcf:9090'
-          - 'bsf:9090'
