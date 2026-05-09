@@ -119,6 +119,19 @@ services:
       placement:
         constraints:
           - node.hostname == vm-core-5g
+  scp:
+    image: gradiant/open5gs:2.7.0
+    entrypoint: [""]
+    command: ["bash", "-c", "mkdir -p /var/log/open5gs && sleep 3 && open5gs-scpd"]
+    volumes:
+      - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
+    networks:
+      - overlay-5g
+      - overlay-monitoring
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == vm-core-5g
   webui:
     image: gradiant/open5gs-webui:2.7.0
     environment:
