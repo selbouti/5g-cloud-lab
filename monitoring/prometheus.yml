@@ -17,8 +17,7 @@ scrape_configs:
           - '10.0.1.10:8080'
 
   - job_name: 'open5gs'
-    scrape_protocols:
-      - PrometheusText0.0.4
+    fallback_scrape_protocol: PrometheusText0.0.4
     static_configs:
       - targets:
           - 'amf:9090'
