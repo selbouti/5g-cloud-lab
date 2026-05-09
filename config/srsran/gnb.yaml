@@ -4,9 +4,9 @@ nci: '0x000000010'
 idLength: 32
 tac: 1
 
-linkIp: 10.0.1.10
-ngapIp: 10.0.1.10
-gtpIp: 10.0.1.10
+linkIp: 0.0.0.0
+ngapIp: 0.0.0.0
+gtpIp: 0.0.0.0
 
 amfConfigs:
   - address: 10.0.1.6
