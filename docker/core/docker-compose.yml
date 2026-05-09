@@ -112,9 +112,10 @@ services:
     volumes:
       - /home/ubuntu/config/open5gs:/opt/open5gs/etc/open5gs
     networks:
-      - overlay-5g
-      - overlay-radio
-      - overlay-monitoring
+      overlay-5g:
+      overlay-radio:
+        ipv4_address: 10.0.2.10
+      overlay-monitoring:
     deploy:
       placement:
         constraints:
