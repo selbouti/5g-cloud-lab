@@ -6,7 +6,7 @@ sudo docker run -d --name ueransim-gnb \
   --network overlay-radio \
   --privileged \
   --cap-add NET_ADMIN \
-  -v ~/5g-cloud-lab/srsran/gnb.yaml:/ueransim/config/open5gs-gnb.yaml \
+  -v ~/5g-cloud-lab/config/srsran/gnb.yaml:/ueransim/config/open5gs-gnb.yaml \
   free5gc/ueransim:latest \
   bash -c "/ueransim/nr-gnb -c /ueransim/config/open5gs-gnb.yaml"
 
@@ -18,6 +18,6 @@ sudo docker run -d --name ueransim-ue \
   --network overlay-radio \
   --privileged \
   --cap-add NET_ADMIN \
-  -v ~/5g-cloud-lab/srsran/ue.yaml:/ueransim/config/open5gs-ue.yaml \
+  -v ~/5g-cloud-lab/config/srsran/ue.yaml:/ueransim/config/open5gs-ue.yaml \
   free5gc/ueransim:latest \
   bash -c "/ueransim/nr-ue -c /ueransim/config/open5gs-ue.yaml"
