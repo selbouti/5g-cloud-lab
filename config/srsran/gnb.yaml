@@ -9,7 +9,7 @@ ngapIp: 0.0.0.0
 gtpIp: 0.0.0.0
 
 amfConfigs:
-  - address: core5g_amf
+  - address: 10.0.2.110
     port: 38412
 
 slices:
